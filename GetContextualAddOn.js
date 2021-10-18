@@ -25,7 +25,8 @@
  function getContextualAddOn(event) {
     var message = getCurrentMessage(event);
     var prefills = {
-        title: getTitle(message)
+        title: getTitle(message),
+        date_time: findSchedule()
     };
     var card = createSchedulerCard(prefills);
   

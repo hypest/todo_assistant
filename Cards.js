@@ -51,6 +51,23 @@ function createFormSection(section, opt_prefills) {
         .addItem("4h", min2ms(240), false);
     section.addWidget(durationSelection);
 
+    const dateTimeLabel = CardService.newTextParagraph();
+    const dateTimePicker = CardService.newDateTimePicker()
+      .setTitle("Spot found:")
+      .setFieldName("date_time_field");
+      // Set default value as Jan 1, 2018, 3:00 AM UTC. Either a number or string is acceptable.
+    if (opt_prefills && opt_prefills.date_time) {
+      dateTimePicker.setValueInMsSinceEpoch(opt_prefills.date_time.getTime());
+      dateTimeLabel.setText(opt_prefills.date_time.toString());
+    }
+      // .setValueInMsSinceEpoch(1514775600);
+      // // EDT time is 5 hours behind UTC.
+      // .setTimeZoneOffsetInMins(-5 * 60)
+      // .setOnChangeAction(CardService.newAction()
+      // .setFunctionName("handleDateTimeChange"));
+    section.addWidget(dateTimeLabel);
+    section.addWidget(dateTimePicker);
+
     // for (var i = 0; i < inputNames.length; i++) {
     //     var widget = CardService.newTextInput()
     //     .setFieldName(inputNames[i])

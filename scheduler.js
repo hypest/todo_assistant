@@ -14,6 +14,16 @@ function testScheduler() {
   console.log(found);
 }
 
+function findSchedule(duration = 30 * 60 * 1000 /* 30mins */) {
+  const events = getNextWeekEvents(
+    CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com")
+    .concat(CalendarApp.getCalendarsByName("gates")));
+
+  const sortedEvents = sortEvents(events.slice(0));
+  const now = new Date();
+  return findSpot(sortedEvents, now, duration);
+}
+
 function getNextWeekEvents(calendars) {
   const now = new Date();
   const oneWeekFromNow = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));

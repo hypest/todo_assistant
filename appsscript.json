@@ -21,7 +21,7 @@
   ],
   "gmail": {
     "name": "Schedular",
-    "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/receipt_black_24dp.png",
+    "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/add_task_black_24dp.png",
     "contextualTriggers": [
       {
         "unconditional": {},

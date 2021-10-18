@@ -35,11 +35,11 @@ function sortEvents(events) {
   });
 }
 
-function findSpot(events, after, duration_ms) {
+function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
   const found = events.reduce((prev, event) => {
     // console.log(event.getStartTime());
     // console.log(`Checking: prev:${prev}, ev:${event.getTitle()} (${event.getStartTime()})`)
-    if (event.isAllDayEvent()) {
+    if (ignoreAllDayEvents && event.isAllDayEvent()) {
       // console.log("Ignoring all day events for now");
       return prev;
     }

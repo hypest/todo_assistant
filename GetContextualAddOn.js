@@ -24,11 +24,10 @@
  */
  function getContextualAddOn(event) {
     var message = getCurrentMessage(event);
-    var prefills = [getReceivedDate(message),
-                    getLargestAmount(message),
-                    getExpenseDescription(message),
-                    getSheetUrl()];
-    var card = createExpensesCard(prefills);
+    var prefills = {
+        title: getTitle(message)
+    };
+    var card = createSchedulerCard(prefills);
   
     return [card.build()];
   }

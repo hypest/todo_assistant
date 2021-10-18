@@ -25,6 +25,30 @@ function createSchedulerCard(opt_prefills, opt_status) {
 function min2ms(minutes) {
     return minutes * 60 * 1000;
 }
+
+function handleDurationSelectionChange(e) {
+  // console.log(e.commonEventObject.formInputs.duration_field.stringInputs.value[0]);
+  // get the new duration from the Selection Input
+  const duration_ms = e.commonEventObject.formInputs.duration_field.stringInputs.value[0];
+ 
+  // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
+  const opt_prefills = JSON.parse(e.parameters.prefills);
+
+  // update the prefills, in preparation of rebuilding the card
+  opt_prefills.duration_ms = duration_ms;
+  opt_prefills.date_time = findSchedule(duration_ms);
+ 
+  // rebuild the card
+  const updatedCard = createSchedulerCard(opt_prefills);
+ 
+  // set the new card as the root one, replacing the previous
+  return CardService.newActionResponseBuilder().setNavigation(
+      CardService.newNavigation()
+      .popToRoot()
+      .updateCard(updatedCard.build())
+    ).build();
+}
+
 /**
  * Creates form section to be displayed on card.
  *
@@ -40,15 +64,25 @@ function createFormSection(section, opt_prefills) {
     }
     section.addWidget(titleInput);
 
+    function addDurationItem(widget, label, minutes, selectedDurationMs) {
+      const ms = min2ms(minutes);
+      widget.addItem(label, ms, ms == selectedDurationMs)
+    }
+
+    const durationChangeAction = CardService.newAction()
+        .setFunctionName("handleDurationSelectionChange")
+        .setParameters({prefills: JSON.stringify(opt_prefills)}); // pass all the prefills as JSON, was failing if as plain object
     const durationSelection = CardService.newSelectionInput()
         .setType(CardService.SelectionInputType.RADIO_BUTTON)
         .setTitle("Pick duration")
         .setFieldName("duration_field")
-        .addItem("10min", min2ms(10), false)
-        .addItem("30min", min2ms(30), true)
-        .addItem("1h", min2ms(60), false)
-        .addItem("2h", min2ms(120), false)
-        .addItem("4h", min2ms(240), false);
+        .setOnChangeAction(durationChangeAction);
+    const defaultDurationMs = min2ms(30);
+    addDurationItem(durationSelection, "10min", 10, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
+    addDurationItem(durationSelection, "30min", 30, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
+    addDurationItem(durationSelection, "1h", 60, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
+    addDurationItem(durationSelection, "2h", 120, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
+    addDurationItem(durationSelection, "4h", 240, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
     section.addWidget(durationSelection);
 
     const dateTimeLabel = CardService.newTextParagraph();

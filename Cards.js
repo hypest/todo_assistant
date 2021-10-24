@@ -64,9 +64,9 @@ function createFormSection(section, opt_prefills) {
     }
     section.addWidget(titleInput);
 
-    function addDurationItem(widget, label, minutes, selectedDurationMs) {
+    function addDurationItem(widget, label, minutes, opt_prefills) {
       const ms = min2ms(minutes);
-      widget.addItem(label, ms, ms == selectedDurationMs)
+      widget.addItem(label, ms, ms == (opt_prefills?.duration_ms ? opt_prefills?.duration_ms : DEFAULT_DURATION_MS))
     }
 
     const durationChangeAction = CardService.newAction()
@@ -77,12 +77,11 @@ function createFormSection(section, opt_prefills) {
         .setTitle("Pick duration")
         .setFieldName("duration_field")
         .setOnChangeAction(durationChangeAction);
-    const defaultDurationMs = min2ms(30);
-    addDurationItem(durationSelection, "10min", 10, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
-    addDurationItem(durationSelection, "30min", 30, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
-    addDurationItem(durationSelection, "1h", 60, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
-    addDurationItem(durationSelection, "2h", 120, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
-    addDurationItem(durationSelection, "4h", 240, opt_prefills ? opt_prefills.duration_ms : defaultDurationMs);
+    addDurationItem(durationSelection, "10min", 10, opt_prefills);
+    addDurationItem(durationSelection, "30min", 30, opt_prefills);
+    addDurationItem(durationSelection, "1h", 60, opt_prefills);
+    addDurationItem(durationSelection, "2h", 120, opt_prefills);
+    addDurationItem(durationSelection, "4h", 240, opt_prefills);
     section.addWidget(durationSelection);
 
     const dateTimeLabel = CardService.newTextParagraph();

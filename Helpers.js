@@ -1,5 +1,28 @@
+function min2ms(minutes) {
+    return minutes * 60 * 1000;
+}
+
 function getTitle(message) {
   return message.getSubject();
+}
+
+function clearAndGetAutoBook() {
+  const cal = CalendarApp.getCalendarById("6f0cu5b0kg8iuau58cae2sinp8@group.calendar.google.com");
+  const now = new Date();
+  const events = cal.getEvents(new Date(now.getTime() - (10 * 7 * 24 * 60 * 60 * 1000)), new Date(now.getTime() + (10 * 7 * 24 * 60 * 60 * 1000)));
+  events.forEach((ev) => { ev.deleteEvent(); });
+  return cal;
+}
+
+function findAndMarkSchedule(title, duration_ms) {
+  const cal = clearAndGetAutoBook();
+  const date_time = findSchedule(duration_ms);
+  console.log(`Found date_time:${date_time} for duration:${duration_ms}`);
+  if (date_time) {
+    const endDate = new Date(date_time.getTime() + duration_ms);
+    cal.createEvent(title, date_time, endDate);
+  }
+  return date_time;
 }
 
 // /**

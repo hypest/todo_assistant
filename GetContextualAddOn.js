@@ -24,9 +24,10 @@
  */
  function getContextualAddOn(event) {
     var message = getCurrentMessage(event);
+    const title = getTitle(message);
     var prefills = {
-        title: getTitle(message),
-        date_time: findSchedule()
+        title: title,
+        date_time: findAndMarkSchedule(title, DEFAULT_DURATION_MS)
     };
     var card = createSchedulerCard(prefills);
   

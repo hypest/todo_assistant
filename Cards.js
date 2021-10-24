@@ -22,21 +22,17 @@ function createSchedulerCard(opt_prefills, opt_status) {
   return card;
 }
 
-function min2ms(minutes) {
-    return minutes * 60 * 1000;
-}
-
 function handleDurationSelectionChange(e) {
   // console.log(e.commonEventObject.formInputs.duration_field.stringInputs.value[0]);
   // get the new duration from the Selection Input
-  const duration_ms = e.commonEventObject.formInputs.duration_field.stringInputs.value[0];
+  const duration_ms = Number(e.commonEventObject.formInputs.duration_field.stringInputs.value[0]);
  
   // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
   const opt_prefills = JSON.parse(e.parameters.prefills);
 
   // update the prefills, in preparation of rebuilding the card
   opt_prefills.duration_ms = duration_ms;
-  opt_prefills.date_time = findSchedule(duration_ms);
+  opt_prefills.date_time = findAndMarkSchedule(opt_prefills.title, duration_ms);
  
   // rebuild the card
   const updatedCard = createSchedulerCard(opt_prefills);
@@ -47,6 +43,42 @@ function handleDurationSelectionChange(e) {
       .popToRoot()
       .updateCard(updatedCard.build())
     ).build();
+}
+
+function buttonsGrid() {
+  const gridItem10m = CardService.newGridItem()
+    .setIdentifier("item_10m")
+    .setTitle("10mins");
+  const gridItem30m = CardService.newGridItem()
+    .setIdentifier("item_30m")
+    .setTitle("30mins");
+  const gridItem60m = CardService.newGridItem()
+    .setIdentifier("item_60m")
+    .setTitle("1h");
+  const gridItem120m = CardService.newGridItem()
+    .setIdentifier("item_120m")
+    .setTitle("2h");
+  const gridItem240m = CardService.newGridItem()
+    .setIdentifier("item_240m")
+    .setTitle("4h");
+
+  const borderStyle = CardService.newBorderStyle()
+    .setType(CardService.BorderType.STROKE)
+    .setCornerRadius(8)
+    .setStrokeColor("#00FF00FF");
+
+  const grid = CardService.newGrid()
+    .setTitle("Pich duration")
+    .addItem(gridItem10m)
+    .addItem(gridItem30m)
+    .addItem(gridItem60m)
+    .addItem(gridItem120m)
+    .addItem(gridItem240m)
+    .setNumColumns(2)
+    .setOnClickAction(CardService.newAction()
+        .setFunctionName("handleGridItemClick"));
+
+  return grid;
 }
 
 /**
@@ -83,6 +115,8 @@ function createFormSection(section, opt_prefills) {
     addDurationItem(durationSelection, "2h", 120, opt_prefills);
     addDurationItem(durationSelection, "4h", 240, opt_prefills);
     section.addWidget(durationSelection);
+
+    section.addWidget(buttonsGrid());
 
     const dateTimeLabel = CardService.newTextParagraph();
     const dateTimePicker = CardService.newDateTimePicker()

@@ -17,7 +17,7 @@ function testScheduler() {
   });
 }
 
-function findSchedule(duration = 30 * 60 * 1000 /* 30mins */, now) {
+function findSchedule(duration, now) {
   const events = getNextWeekEvents(
     CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com")
     .concat(CalendarApp.getCalendarsByName("gates"))

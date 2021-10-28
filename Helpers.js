@@ -2,8 +2,10 @@ function min2ms(minutes) {
     return minutes * 60 * 1000;
 }
 
-function oneWeekFrom(now) {
-  return new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+function oneWeekFrom(start) {
+  const daysToAdd = 1 + 7 + (start.getDay() == 0 ? 0 : 7-start.getDay());
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  return new Date(startDay.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
 }
 
 function getTitle(message) {

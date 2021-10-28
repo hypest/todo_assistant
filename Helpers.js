@@ -7,7 +7,7 @@ function getTitle(message) {
 }
 
 function clearAndGetAutoBook() {
-  const cal = CalendarApp.getCalendarById("6f0cu5b0kg8iuau58cae2sinp8@group.calendar.google.com");
+  const cal = CalendarApp.getCalendarById(AUTOBOOK_CALENDAR_ID);
   const now = new Date();
   const events = cal.getEvents(new Date(now.getTime() - (10 * 7 * 24 * 60 * 60 * 1000)), new Date(now.getTime() + (10 * 7 * 24 * 60 * 60 * 1000)));
   events.forEach((ev) => { ev.deleteEvent(); });

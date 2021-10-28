@@ -11,7 +11,7 @@ function testScheduler() {
   const sortedEvents = sortEvents(events.slice(0));
   const offset = new Date((new Date()).getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
   const found = findSpot(sortedEvents, offset, 3 * 60 * 60 * 1000);
-  console.log(found);
+  console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
 }
 
 function findSchedule(duration = 30 * 60 * 1000 /* 30mins */) {
@@ -46,35 +46,40 @@ function sortEvents(events) {
 }
 
 function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
-  const found = events.reduce((prev, event) => {
-    // console.log(event.getStartTime());
-    // console.log(`Checking: prev:${prev}, ev:${event.getTitle()} (${event.getStartTime()})`)
+  const foundCtx = events.reduce((ctx, event) => {
+    const {pE, caret,aE} = ctx;
     if (ignoreAllDayEvents && event.isAllDayEvent()) {
       // console.log("Ignoring all day events for now");
-      return prev;
+      return ctx;
     }
 
-    const prevTime = prev.getTime();
+    const caretTime = caret.getTime();
+
     const eventStartTime = event.getStartTime().getTime();
     const eventEndTime = event.getEndTime().getTime();
-    if (eventStartTime < prevTime) {
-      if (eventEndTime <= prevTime) {
-        // console.log(`Returning ${prev}`);
-        return prev;
+
+    // check if event is earlier or colliding
+    if (eventStartTime < caretTime) {
+      if (eventEndTime <= caretTime) {
+        return {pE:event, caret, aE};
       } else {
-        // console.log(`Returning ${event.getEndTime()}`);
-        return event.getEndTime();
+        return {pE:event, caret:(event.getEndTime()), aE};
       }
     }
 
-    if ((eventStartTime - prev.getTime()) > duration_ms) {
-        // console.log(`Returning ${prev}`);
-      return prev;
+    // check if there's enough time until the event
+    if ((eventStartTime - caretTime) < duration_ms) {
+      return {pE:event, caret:(event.getEndTime()), aE};
     } else {
-        // console.log(`Returning ${event.getEndTime()}`);
-      return event.getEndTime();
-    }
-  }, after);
+      // next event is already found, just return the current context
+      if (aE) {
+        return ctx;
+      }
 
-  return found;
+      // there's enough space until the event so, mark the event as next.
+      return {pE, caret, aE:event};
+    }
+  }, {caret:after});
+
+  return foundCtx;
 }

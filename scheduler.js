@@ -2,7 +2,7 @@
 
 function testScheduler() {
   const now = new Date();
-  const events = getEvents(CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com").concat(CalendarApp.getCalendarsByName("gates")), now, oneWeekFrom(now));
+  const events = getEvents(CALENDARS, now, oneWeekFrom(now));
 
   // console.log(events);
   // events.forEach((event, index, array) => {
@@ -26,10 +26,7 @@ function testFindSchedule() {
 }
 
 function findSchedule(duration, now, until) {
-  const events = getEvents(
-    CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com")
-    .concat(CalendarApp.getCalendarsByName("gates"))
-    , now, until);
+  const events = getEvents(CALENDARS, now, until);
 
   const sortedEvents = sortEvents(events.slice(0));
   return findSpot(sortedEvents, now, duration, until);

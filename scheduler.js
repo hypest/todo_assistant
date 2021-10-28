@@ -48,6 +48,12 @@ function sortEvents(events) {
 function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
   const foundCtx = events.reduce((ctx, event) => {
     const {pE, caret,aE} = ctx;
+
+    if (aE) {
+      // next event is already found so the search is over, just return the current context
+      return ctx;
+    }
+
     if (ignoreAllDayEvents && event.isAllDayEvent()) {
       // console.log("Ignoring all day events for now");
       return ctx;
@@ -71,11 +77,6 @@ function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
     if ((eventStartTime - caretTime) < duration_ms) {
       return {pE:event, caret:(event.getEndTime()), aE};
     } else {
-      // next event is already found, just return the current context
-      if (aE) {
-        return ctx;
-      }
-
       // there's enough space until the event so, mark the event as next.
       return {pE, caret, aE:event};
     }

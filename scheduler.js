@@ -115,7 +115,7 @@ function findSpot(events, after, duration_ms, before, ignoreAllDayEvents=true) {
   }, [{caret:after}]);
 
   if (! foundCtx[0].aE && (foundCtx[0].caret.getTime() + duration_ms) > before.getTime()) {
-    // we've reached the end of the events list but there's no enough time left so, return empty
+    // we've reached the end of the events list but there's not enough time left so, return empty
     return [];
   }
 

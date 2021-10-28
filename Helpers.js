@@ -2,6 +2,10 @@ function min2ms(minutes) {
     return minutes * 60 * 1000;
 }
 
+function oneWeekFrom(now) {
+  return new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+}
+
 function getTitle(message) {
   return message.getSubject();
 }

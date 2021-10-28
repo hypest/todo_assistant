@@ -32,10 +32,6 @@ function findSchedule(duration, now, until) {
   return findSpot(sortedEvents, now, duration, until);
 }
 
-function oneWeekFrom(now) {
-  return new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
-}
-
 function getEvents(calendars, after, until) {
   return calendars.reduce((acc, calendar) => {
     // console.log(calendar.getName());

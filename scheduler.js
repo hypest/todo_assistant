@@ -2,7 +2,7 @@
 
 function testScheduler() {
   const now = new Date();
-  const events = getNextWeekEvents(CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com").concat(CalendarApp.getCalendarsByName("gates")), now);
+  const events = getEvents(CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com").concat(CalendarApp.getCalendarsByName("gates")), now, oneWeekFrom(now));
 
   // console.log(events);
   // events.forEach((event, index, array) => {
@@ -17,24 +17,32 @@ function testScheduler() {
   });
 }
 
-function findSchedule(duration, now) {
-  const events = getNextWeekEvents(
+function testFindSchedule() {
+  const now = new Date();
+  const founds = findSchedule(3 * 60 * 60 * 1000, now, oneWeekFrom(now));
+  founds.forEach( (found) => {
+      console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
+  });
+}
+
+function findSchedule(duration, now, until) {
+  const events = getEvents(
     CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com")
     .concat(CalendarApp.getCalendarsByName("gates"))
-    , now);
+    , now, until);
 
   const sortedEvents = sortEvents(events.slice(0));
-  return findSpot(sortedEvents, now, duration, before);
+  return findSpot(sortedEvents, now, duration, until);
 }
 
 function oneWeekFrom(now) {
   return new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
 }
 
-function getNextWeekEvents(calendars, now) {
+function getEvents(calendars, after, until) {
   return calendars.reduce((acc, calendar) => {
     // console.log(calendar.getName());
-    const es = calendar.getEvents(now, oneWeekFrom(now));
+    const es = calendar.getEvents(after, until);
     acc = acc.concat(es);
     return acc;
   }, []);

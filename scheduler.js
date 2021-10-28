@@ -11,7 +11,7 @@ function testScheduler() {
 
   const sortedEvents = sortEvents(events.slice(0));
   const offset = new Date(now.getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
-  const founds = findSpot(sortedEvents, offset, 3 * 60 * 60 * 1000);
+  const founds = findSpot(sortedEvents, offset, 3 * 60 * 60 * 1000, oneWeekFrom(now));
   founds.forEach( (found) => {
       console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
   });
@@ -24,7 +24,7 @@ function findSchedule(duration, now) {
     , now);
 
   const sortedEvents = sortEvents(events.slice(0));
-  return findSpot(sortedEvents, now, duration);
+  return findSpot(sortedEvents, now, duration, before);
 }
 
 function oneWeekFrom(now) {
@@ -50,7 +50,7 @@ function sortEvents(events) {
   });
 }
 
-function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
+function findSpot(events, after, duration_ms, before, ignoreAllDayEvents=true) {
   const foundCtx = events.reduce((ctx, event, index, array) => {
     const [{pE, caret, aE}, ...others] = ctx;
 
@@ -99,7 +99,7 @@ function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
       // there's enough space until the event so, mark the event as next.
 
       // but first, let's find the next available spot (recursively)
-      const nextOptions = findSpot(array.slice(index), event.getEndTime(), duration_ms, ignoreAllDayEvents);
+      const nextOptions = findSpot(array.slice(index), event.getEndTime(), duration_ms, before, ignoreAllDayEvents);
       others.push(...nextOptions);
 
       return [
@@ -112,6 +112,11 @@ function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
       ];
     }
   }, [{caret:after}]);
+
+  if (! foundCtx[0].aE && (foundCtx[0].caret.getTime() + duration_ms) > before.getTime()) {
+    // we've reached the end of the events list but there's no enough time left so, return empty
+    return [];
+  }
 
   return foundCtx;
 }

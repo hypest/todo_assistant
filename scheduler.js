@@ -66,15 +66,19 @@ function findSpot(events, after, duration_ms, ignoreAllDayEvents=true) {
 
     // check if event is earlier or colliding
     if (eventStartTime < caretTime) {
-      if (eventEndTime <= caretTime) {
-        return {pE:event, caret, aE};
-      } else {
-        return {pE:event, caret:(event.getEndTime()), aE};
-      }
+      return {
+        pE:event,
+        caret: (eventEndTime <= caretTime)
+          ? caret // event ends before the caret so, caret is still the later
+          : event.getEndTime(), // event ends after the caret so, bump the caret to the end of the event
+        aE
+      };
     }
+    // event starts after the caret
 
-    // check if there's enough time until the event
+    // check if there's enough time between the caret and the event
     if ((eventStartTime - caretTime) < duration_ms) {
+      // there isn't enough time so, move caret to the end of the event
       return {pE:event, caret:(event.getEndTime()), aE};
     } else {
       // there's enough space until the event so, mark the event as next.

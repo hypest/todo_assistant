@@ -9,7 +9,7 @@ function testScheduler() {
   //   console.log(event.getTitle());
   // });
 
-  const sortedEvents = sortEvents(events);
+  const sortedEvents = removeEngulfed(sortEvents(events));
   const offset = new Date(now.getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
   const founds = findSpot(sortedEvents, offset, 3 * 60 * 60 * 1000, oneWeekFrom(now));
   founds.forEach( (found) => {
@@ -28,7 +28,7 @@ function testFindSchedule() {
 function findSchedule(duration, now, until) {
   const events = getEvents(CALENDARS, now, until);
 
-  const sortedEvents = sortEvents(events);
+  const sortedEvents = removeEngulfed(sortEvents(events));
   return findSpot(sortedEvents, now, duration, until);
 }
 
@@ -49,6 +49,22 @@ function sortEvents(events) {
       return 1;
     }
   });
+}
+
+function removeEngulfed(events) {
+  return events.reduce((acc, event) => {
+    // when in the start, just return an array with the item
+    if (acc.length == 0) {
+      return [event];
+    }
+
+    if (event.getEndTime() <= acc[acc.length-1].getEndTime()) {
+      return acc;
+    } else {
+      acc.push(event);
+      return acc;
+    }
+  }, []);
 }
 
 function findSpot(events, after, duration_ms, before, ignoreAllDayEvents=true) {

@@ -6,17 +6,16 @@ function getTitle(message) {
   return message.getSubject();
 }
 
-function clearAndGetAutoBook() {
+function clearAndGetAutoBook(now) {
   const cal = CalendarApp.getCalendarById(AUTOBOOK_CALENDAR_ID);
-  const now = new Date();
   const events = cal.getEvents(new Date(now.getTime() - (10 * 7 * 24 * 60 * 60 * 1000)), new Date(now.getTime() + (10 * 7 * 24 * 60 * 60 * 1000)));
   events.forEach((ev) => { ev.deleteEvent(); });
   return cal;
 }
 
-function findAndMarkSchedule(title, duration_ms) {
-  const cal = clearAndGetAutoBook();
-  const date_time = findSchedule(duration_ms);
+function findAndMarkSchedule(title, duration_ms, now = new Date()) {
+  const cal = clearAndGetAutoBook(now);
+  const date_time = findSchedule(duration_ms, now);
   console.log(`Found date_time:${date_time} for duration:${duration_ms}`);
   if (date_time) {
     const endDate = new Date(date_time.getTime() + duration_ms);

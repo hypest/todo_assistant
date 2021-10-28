@@ -1,7 +1,8 @@
 // eval(UrlFetchApp.fetch('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js').getContentText());
 
 function testScheduler() {
-  const events = getNextWeekEvents(CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com").concat(CalendarApp.getCalendarsByName("gates")));
+  const now = new Date();
+  const events = getNextWeekEvents(CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com").concat(CalendarApp.getCalendarsByName("gates")), now);
 
   // console.log(events);
   // events.forEach((event, index, array) => {
@@ -9,29 +10,31 @@ function testScheduler() {
   // });
 
   const sortedEvents = sortEvents(events.slice(0));
-  const offset = new Date((new Date()).getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
+  const offset = new Date(now.getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
   const founds = findSpot(sortedEvents, offset, 3 * 60 * 60 * 1000);
   founds.forEach( (found) => {
       console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
   });
 }
 
-function findSchedule(duration = 30 * 60 * 1000 /* 30mins */) {
+function findSchedule(duration = 30 * 60 * 1000 /* 30mins */, now) {
   const events = getNextWeekEvents(
     CalendarApp.getCalendarsByName("stefanos.togoulidis@a8c.com")
-    .concat(CalendarApp.getCalendarsByName("gates")));
+    .concat(CalendarApp.getCalendarsByName("gates"))
+    , now);
 
   const sortedEvents = sortEvents(events.slice(0));
-  const now = new Date();
   return findSpot(sortedEvents, now, duration);
 }
 
-function getNextWeekEvents(calendars) {
-  const now = new Date();
-  const oneWeekFromNow = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+function oneWeekFrom(now) {
+  return new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+}
+
+function getNextWeekEvents(calendars, now) {
   return calendars.reduce((acc, calendar) => {
     // console.log(calendar.getName());
-    const es = calendar.getEvents(now, oneWeekFromNow);
+    const es = calendar.getEvents(now, oneWeekFrom(now));
     acc = acc.concat(es);
     return acc;
   }, []);

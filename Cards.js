@@ -48,10 +48,9 @@ function handleDurationSelectionChange(e) {
 function createGridItem(label, minutes, opt_prefills) {
   const ms = min2ms(minutes);
   const isSelected = ms == (opt_prefills?.duration_ms ? opt_prefills?.duration_ms : DEFAULT_DURATION_MS);
-  const gridItem = CardService.newGridItem()
+  return CardService.newGridItem()
     .setTitle((isSelected ? '◉ ' : '◎ ') + label)
     .setIdentifier(ms);
-  return gridItem;
 }
 
 function buttonsGrid(opt_prefills) {

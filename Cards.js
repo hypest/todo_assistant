@@ -61,14 +61,13 @@ function buttonsGrid(opt_prefills) {
 
   const grid = CardService.newGrid()
     .setTitle("Pick duration")
-    .addItem(createGridItem('10m', 10, opt_prefills))
-    .addItem(createGridItem('30m', 30, opt_prefills))
-    .addItem(createGridItem('45m', 45, opt_prefills))
-    .addItem(createGridItem('1h', 60, opt_prefills))
-    .addItem(createGridItem('2h', 120, opt_prefills))
-    .addItem(createGridItem('4h', 240, opt_prefills))
     .setNumColumns(3)
     .setOnClickAction(durationChangeAction);
+
+    [['10m', 10], ['30m', 30], ['45m', 45],
+      ['1h', 60], ['2h', 120], ['4h', 240]].forEach(
+        ([label, mins]) => grid.addItem(createGridItem(label, mins, opt_prefills))
+    )
 
   return grid;
 }

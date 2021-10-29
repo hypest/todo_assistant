@@ -22,20 +22,10 @@ function createSchedulerCard(opt_prefills, opt_status) {
   return card;
 }
 
-function handleDurationSelectionChange(e) {
-  // console.log(e.commonEventObject.formInputs.duration_field.stringInputs.value[0]);
-  // get the new duration from the Selection Input
-  const duration_ms = Number(e.commonEventObject.formInputs.duration_field.stringInputs.value[0]);
- 
-  // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
-  const opt_prefills = JSON.parse(e.parameters.prefills);
-
-  // update the prefills, in preparation of rebuilding the card
-  opt_prefills.duration_ms = duration_ms;
+function onDurationSelected(duration_ms, opt_prefills) {
   opt_prefills.date_time = findAndMarkSchedule(opt_prefills.title, opt_prefills.events, duration_ms, opt_prefills.startTimeMS, opt_prefills.untilTimeMS);
+  opt_prefills.duration_ms = duration_ms;
 
-  console.timeEnd("Schedule after tap");
-  console.time("Creating card");
   // rebuild the card
   const updatedCard = createSchedulerCard(opt_prefills);
  
@@ -47,38 +37,40 @@ function handleDurationSelectionChange(e) {
     ).build();
 }
 
-function buttonsGrid() {
-  const gridItem10m = CardService.newGridItem()
-    .setIdentifier("item_10m")
-    .setTitle("10mins");
-  const gridItem30m = CardService.newGridItem()
-    .setIdentifier("item_30m")
-    .setTitle("30mins");
-  const gridItem60m = CardService.newGridItem()
-    .setIdentifier("item_60m")
-    .setTitle("1h");
-  const gridItem120m = CardService.newGridItem()
-    .setIdentifier("item_120m")
-    .setTitle("2h");
-  const gridItem240m = CardService.newGridItem()
-    .setIdentifier("item_240m")
-    .setTitle("4h");
+function handleDurationSelectionChange(e) {
+  // get the new duration from the grid identifier
+  const duration_ms = Number(e.parameters.grid_item_identifier);
+ 
+  // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
+  const opt_prefills = JSON.parse(e.parameters.prefills);
 
-  const borderStyle = CardService.newBorderStyle()
-    .setType(CardService.BorderType.STROKE)
-    .setCornerRadius(8)
-    .setStrokeColor("#00FF00FF");
+  return onDurationSelected(duration_ms, opt_prefills);
+}
+
+function createGridItem(label, minutes, opt_prefills) {
+  const ms = min2ms(minutes);
+  const isSelected = ms == (opt_prefills?.duration_ms ? opt_prefills?.duration_ms : DEFAULT_DURATION_MS);
+  const gridItem = CardService.newGridItem()
+    .setTitle((isSelected ? '◉ ' : '◎ ') + label)
+    .setIdentifier(ms);
+  return gridItem;
+}
+
+function buttonsGrid(opt_prefills) {
+  const durationChangeAction = CardService.newAction()
+      .setFunctionName("handleDurationSelectionChange")
+      .setParameters({prefills: JSON.stringify(opt_prefills)}); // pass all the prefills as JSON, was failing if as plain object
 
   const grid = CardService.newGrid()
-    .setTitle("Pich duration")
-    .addItem(gridItem10m)
-    .addItem(gridItem30m)
-    .addItem(gridItem60m)
-    .addItem(gridItem120m)
-    .addItem(gridItem240m)
-    .setNumColumns(2)
-    .setOnClickAction(CardService.newAction()
-        .setFunctionName("handleGridItemClick"));
+    .setTitle("Pick duration")
+    .addItem(createGridItem('10m', 10, opt_prefills))
+    .addItem(createGridItem('30m', 30, opt_prefills))
+    .addItem(createGridItem('45m', 45, opt_prefills))
+    .addItem(createGridItem('1h', 60, opt_prefills))
+    .addItem(createGridItem('2h', 120, opt_prefills))
+    .addItem(createGridItem('4h', 240, opt_prefills))
+    .setNumColumns(3)
+    .setOnClickAction(durationChangeAction);
 
   return grid;
 }
@@ -91,34 +83,13 @@ function buttonsGrid() {
  */
 function createFormSection(section, opt_prefills) {
     const titleInput = CardService.newTextInput()
-        .setTitle("Title")
         .setFieldName("title_field");
     if (opt_prefills && opt_prefills.title) {
         titleInput.setValue(opt_prefills.title);
     }
     section.addWidget(titleInput);
 
-    function addDurationItem(widget, label, minutes, opt_prefills) {
-      const ms = min2ms(minutes);
-      widget.addItem(label, ms, ms == (opt_prefills?.duration_ms ? opt_prefills?.duration_ms : DEFAULT_DURATION_MS))
-    }
-
-    const durationChangeAction = CardService.newAction()
-        .setFunctionName("handleDurationSelectionChange")
-        .setParameters({prefills: JSON.stringify(opt_prefills)}); // pass all the prefills as JSON, was failing if as plain object
-    const durationSelection = CardService.newSelectionInput()
-        .setType(CardService.SelectionInputType.RADIO_BUTTON)
-        .setTitle("Pick duration")
-        .setFieldName("duration_field")
-        .setOnChangeAction(durationChangeAction);
-    addDurationItem(durationSelection, "10min", 10, opt_prefills);
-    addDurationItem(durationSelection, "30min", 30, opt_prefills);
-    addDurationItem(durationSelection, "1h", 60, opt_prefills);
-    addDurationItem(durationSelection, "2h", 120, opt_prefills);
-    addDurationItem(durationSelection, "4h", 240, opt_prefills);
-    section.addWidget(durationSelection);
-
-    section.addWidget(buttonsGrid());
+    section.addWidget(buttonsGrid(opt_prefills));
 
     const dateTimeLabel = CardService.newTextParagraph();
     const dateTimePicker = CardService.newDateTimePicker()

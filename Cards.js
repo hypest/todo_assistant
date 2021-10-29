@@ -32,8 +32,10 @@ function handleDurationSelectionChange(e) {
 
   // update the prefills, in preparation of rebuilding the card
   opt_prefills.duration_ms = duration_ms;
-  opt_prefills.date_time = findAndMarkSchedule(opt_prefills.title, duration_ms);
- 
+  opt_prefills.date_time = findAndMarkSchedule(opt_prefills.title, opt_prefills.events, duration_ms, opt_prefills.startTimeMS, opt_prefills.untilTimeMS);
+
+  console.timeEnd("Schedule after tap");
+  console.time("Creating card");
   // rebuild the card
   const updatedCard = createSchedulerCard(opt_prefills);
  

@@ -10,8 +10,9 @@ function testScheduler() {
   // });
 
   const sortedEvents = removeEngulfed(sortEvents(events));
-  const offset = new Date(now.getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
-  const founds = findSpot(sortedEvents, offset, 3 * 60 * 60 * 1000, oneWeekFrom(now));
+  const offset = now;//new Date(now.getTime() + 11 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000);
+  // const offset = new Date(now.getTime() + 11 * 60 * 60 * 1000 + 96 * 60 * 60 * 1000);
+  const founds = findSpot(sortedEvents, offset.getTime(), 3 * 60 * 60 * 1000, oneWeekFrom(now).getTime());
   founds.forEach( (found) => {
       console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
   });
@@ -19,23 +20,44 @@ function testScheduler() {
 
 function testFindSchedule() {
   const now = new Date();
-  const founds = findSchedule(3 * 60 * 60 * 1000, now, oneWeekFrom(now));
+  const until = oneWeekFrom(now);
+
+  console.time("Get events");
+  const events = getEvents(CALENDARS, now, until);
+  console.timeEnd("Get events");
+ 
+  var founds = findSchedule(events, 3 * 60 * 60 * 1000, now, until);
+  founds.forEach( (found) => {
+      console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
+  });
+  founds = findSchedule(events, 3 * 60 * 60 * 1000, now, until);
   founds.forEach( (found) => {
       console.log(`Prev: ${found.pE?.getTitle()}\nfound: ${found.caret}\nNext: ${found.aE?.getTitle()}`);
   });
 }
 
-function findSchedule(duration, now, until) {
-  const events = getEvents(CALENDARS, now, until);
-
+function findSchedule(events, duration, nowTimeMS, untilTimeMS) {
+  console.time("Sort events");
   const sortedEvents = removeEngulfed(sortEvents(events));
-  return findSpot(sortedEvents, now, duration, until);
+  console.timeEnd("Sort events");
+  console.time("Find spot");
+  const s = findSpot(sortedEvents, nowTimeMS, duration, untilTimeMS);
+  console.timeEnd("Find spot");
+  return s;
 }
 
 function getEvents(calendars, after, until) {
   return calendars.reduce((acc, calendar) => {
     // console.log(calendar.getName());
     const es = calendar.getEvents(after, until);
+    es.forEach((event) => {
+      event.title = event.getTitle();
+      event.startTime = event.getStartTime();
+      event.endTime = event.getEndTime();
+      event.startTimeMS = event.startTime.getTime();
+      event.endTimeMS = event.endTime.getTime();
+      event.isAllDayEvent = event.isAllDayEvent();
+    })
     acc = acc.concat(es);
     return acc;
   }, []);
@@ -43,7 +65,7 @@ function getEvents(calendars, after, until) {
 
 function sortEvents(events) {
   return events.slice(0).sort((a, b) => {
-    if (a.getStartTime().getTime() <= b.getStartTime().getTime()) {
+    if (a.startTimeMS <= b.startTimeMS) {
       return -1;
     } else {
       return 1;
@@ -58,7 +80,7 @@ function removeEngulfed(events) {
       return [event];
     }
 
-    if (event.getEndTime() <= acc[acc.length-1].getEndTime()) {
+    if (event.endTimeMS <= acc[acc.length-1].endTimeMS) {
       return acc;
     } else {
       acc.push(event);
@@ -67,33 +89,32 @@ function removeEngulfed(events) {
   }, []);
 }
 
-function findSpot(events, after, duration_ms, before, ignoreAllDayEvents=true) {
+function findSpot(events, afterTimeMS, duration_ms, beforeTimeMS, ignoreAllDayEvents=true) {
   const foundCtx = events.reduce((ctx, event, index, array) => {
-    const [{pE, caret, aE}, ...others] = ctx;
+    const [{pE, caretTimeMS, aE}, ...others] = ctx;
 
     if (aE) {
       // next event is already found so the search is over, just return the current context
       return ctx;
     }
 
-    if (ignoreAllDayEvents && event.isAllDayEvent()) {
+    if (ignoreAllDayEvents && event.isAllDayEvent) {
       // console.log("Ignoring all day events for now");
       return ctx;
     }
 
-    const caretTime = caret.getTime();
+    const eventStartTime = event.startTimeMS;
+    const eventEndTime = event.endTimeMS;
 
-    const eventStartTime = event.getStartTime().getTime();
-    const eventEndTime = event.getEndTime().getTime();
-
+    // console.log(`pE: ${pE ? pE.getTitle():'null'}\nEvent: ${event.getTitle()}\nEvent start: ${event.getStartTime()}\nEvent end: ${event.endTime}\nCaret: ${caretTimeMS}`);
     // check if event is earlier or colliding
-    if (eventStartTime < caretTime) {
+    if (eventStartTime < caretTimeMS) {
       return [
         {
           pE:event,
-          caret: (eventEndTime <= caretTime)
-            ? caret // event ends before the caret so, caret is still the later
-            : event.getEndTime(), // event ends after the caret so, bump the caret to the end of the event
+          caretTimeMS: (eventEndTime <= caretTimeMS)
+            ? caretTimeMS // event ends before the caret so, caret is still the later
+            : event.endTimeMS, // event ends after the caret so, bump the caret to the end of the event
           aE
         },
         ...others
@@ -102,12 +123,12 @@ function findSpot(events, after, duration_ms, before, ignoreAllDayEvents=true) {
     // event starts after the caret
 
     // check if there's enough time between the caret and the event
-    if ((eventStartTime - caretTime) < duration_ms) {
+    if ((eventStartTime - caretTimeMS) < duration_ms) {
       // there isn't enough time so, move caret to the end of the event
       return [
         {
           pE:event,
-          caret:(event.getEndTime()),
+          caretTimeMS:(event.endTimeMS),
           aE
         },
         ...others
@@ -116,24 +137,26 @@ function findSpot(events, after, duration_ms, before, ignoreAllDayEvents=true) {
       // there's enough space until the event so, mark the event as next.
 
       // but first, let's find the next available spot (recursively)
-      const nextOptions = findSpot(array.slice(index), event.getEndTime(), duration_ms, before, ignoreAllDayEvents);
+      const nextOptions = findSpot(array.slice(index), event.endTimeMS, duration_ms, beforeTimeMS, ignoreAllDayEvents);
       others.push(...nextOptions);
 
       return [
         {
           pE,
-          caret,
+          caretTimeMS,
           aE:event
         },
         ...others
       ];
     }
-  }, [{caret:after}]);
+  }, [{caretTimeMS:afterTimeMS}]);
 
-  if (! foundCtx[0].aE && (foundCtx[0].caret.getTime() + duration_ms) > before.getTime()) {
+  if (! foundCtx[0].aE && (foundCtx[0].caretTimeMS + duration_ms) > beforeTimeMS) {
     // we've reached the end of the events list but there's not enough time left so, return empty
     return [];
   }
+
+  foundCtx[0].caret = new Date(foundCtx[0].caretTimeMS);
 
   return foundCtx;
 }

@@ -25,9 +25,19 @@
  function getContextualAddOn(event) {
     var message = getCurrentMessage(event);
     const title = getTitle(message);
+
+    const now = new Date();
+    const until = oneWeekFrom(now);
+    const events = getEvents(CALENDARS, now, until);
+    console.log(events[0].getTitle());
+    console.log(JSON.stringify(events, null, 4));
+
     var prefills = {
         title: title,
-        date_time: findAndMarkSchedule(title, DEFAULT_DURATION_MS)
+        events: events,
+        startTimeMS: now.getTime(),
+        untilTimeMS: until.getTime(),
+        date_time: findAndMarkSchedule(title, events, DEFAULT_DURATION_MS, now, until)
     };
     var card = createSchedulerCard(prefills);
   

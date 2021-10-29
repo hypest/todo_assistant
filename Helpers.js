@@ -19,13 +19,13 @@ function clearAndGetAutoBook(now) {
   return cal;
 }
 
-function findAndMarkSchedule(title, duration_ms, now = new Date(), until = oneWeekFrom(now)) {
-  const cal = clearAndGetAutoBook(now);
-  const date_time = findSchedule(duration_ms, now, until)[0].caret;
-  console.log(`Found date_time:${date_time} for duration:${duration_ms}`);
+function findAndMarkSchedule(title, events, duration_ms, nowTimeMS = new Date().getTime(), untilTimeMS = oneWeekFrom(now).getTime()) {
+  // const cal = clearAndGetAutoBook(now);
+  const date_time = findSchedule(events, duration_ms, nowTimeMS, untilTimeMS)[0].caret;
+  // console.log(`Found date_time:${date_time} for duration:${duration_ms}`);
   if (date_time) {
     const endDate = new Date(date_time.getTime() + duration_ms);
-    cal.createEvent(title, date_time, endDate);
+    // cal.createEvent(title, date_time, endDate);
   }
   return date_time;
 }

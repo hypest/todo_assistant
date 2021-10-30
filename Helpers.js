@@ -23,11 +23,10 @@ function clearAndGetAutoBook(now) {
   return cal;
 }
 
-function markSpot(title, caretTimeMS, duration_ms) {
+function markSpot(title, description, caretTimeMS, duration_ms) {
   const cal = clearAndGetAutoBook(new Date(caretTimeMS));
   const endDate = new Date(caretTimeMS + duration_ms);
-  console.log(`${caretTimeMS}, ${duration_ms}`);
-  cal.createEvent(title, new Date(caretTimeMS), endDate);
+  cal.createEvent(title, new Date(caretTimeMS), endDate, {description: description});
 }
 
 function findAndMarkSchedule(title, events, duration_ms, nowTimeMS = new Date().getTime(), untilTimeMS = oneWeekFrom(now).getTime()) {

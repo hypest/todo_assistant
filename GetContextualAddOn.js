@@ -7,7 +7,8 @@
  * @returns {Card[]}
  */
 function getContextualAddOn(event) {
-  var message = getCurrentMessage(event);
+  const message = getCurrentMessage(event);
+  console.log(message.getId());
   const title = getTitle(message);
 
   const now = new Date();
@@ -16,6 +17,8 @@ function getContextualAddOn(event) {
 
   var prefills = {
       title: title,
+      emailId: message.getId(),
+      emailLink: `https://mail.google.com/mail/u/0/#all/${message.getId()}`,
       events: events,
       startTimeMS: now.getTime(),
       untilTimeMS: until.getTime(),

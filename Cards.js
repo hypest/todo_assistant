@@ -54,8 +54,11 @@ function handleSpotClick(e) {
   // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
   const opt_prefills = JSON.parse(e.parameters.prefills);
 
+  opt_prefills.title = e.commonEventObject.formInputs.title_field.stringInputs.value[0];
+  opt_prefills.description = e.commonEventObject.formInputs.description_field.stringInputs.value[0];
+
   if (opt_prefills.selected_spot) {
-    markSpot(opt_prefills.title, new Date(opt_prefills.selected_spot.caret).getTime(), opt_prefills.duration_ms);
+    markSpot(opt_prefills.title, opt_prefills.description, new Date(opt_prefills.selected_spot.caret).getTime(), opt_prefills.duration_ms);
   } else {
     clearAndGetAutoBook(new Date());
   }
@@ -102,6 +105,14 @@ function createTitleSection(opt_prefills) {
       titleInput.setValue(opt_prefills.title);
   }
   section.addWidget(titleInput);
+
+  section.addWidget(CardService.newTextInput()
+    .setFieldName("description_field")
+    .setMultiline(true)
+    .setHint('Description')
+    .setValue(opt_prefills?.description || `Link to email: ${opt_prefills.emailLink}`));
+
+  section.setCollapsible(true).setNumUncollapsibleWidgets(1);
 
   return section;
 }

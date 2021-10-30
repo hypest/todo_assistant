@@ -37,12 +37,12 @@ function testFindSchedule() {
 }
 
 function findSchedule(events, duration, nowTimeMS, untilTimeMS) {
-  console.time("Sort events");
+  // console.time("Sort events");
   const sortedEvents = removeEngulfed(sortEvents(events));
-  console.timeEnd("Sort events");
-  console.time("Find spot");
+  // console.timeEnd("Sort events");
+  // console.time("Find spot");
   const s = findSpot(sortedEvents, nowTimeMS, duration, untilTimeMS);
-  console.timeEnd("Find spot");
+  // console.timeEnd("Find spot");
   return s;
 }
 

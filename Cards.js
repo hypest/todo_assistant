@@ -21,10 +21,7 @@ function createSchedulerCard(opt_prefills, opt_status) {
   return card;
 }
 
-function onDurationSelected(duration_ms, opt_prefills) {
-  opt_prefills.foundSpots = findAndMarkSchedule(opt_prefills.title, opt_prefills.events, duration_ms, opt_prefills.startTimeMS, opt_prefills.untilTimeMS);
-  opt_prefills.duration_ms = duration_ms;
-
+function rebuildAndSetCard(opt_prefills) {
   // rebuild the card
   const updatedCard = createSchedulerCard(opt_prefills);
  
@@ -36,6 +33,13 @@ function onDurationSelected(duration_ms, opt_prefills) {
     ).build();
 }
 
+function onDurationSelected(duration_ms, opt_prefills) {
+  opt_prefills.foundSpots = findAndMarkSchedule(opt_prefills.title, opt_prefills.events, duration_ms, opt_prefills.startTimeMS, opt_prefills.untilTimeMS);
+  opt_prefills.duration_ms = duration_ms;
+
+  return rebuildAndSetCard(opt_prefills);
+}
+
 function handleDurationSelectionChange(e) {
   // get the new duration from the grid identifier
   const duration_ms = Number(e.parameters.grid_item_identifier);
@@ -44,6 +48,12 @@ function handleDurationSelectionChange(e) {
   const opt_prefills = JSON.parse(e.parameters.prefills);
 
   return onDurationSelected(duration_ms, opt_prefills);
+}
+
+function handleSpotClick(e) {
+  // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
+  const opt_prefills = JSON.parse(e.parameters.prefills);
+  return rebuildAndSetCard(opt_prefills);
 }
 
 function durationFromPrefills(opt_prefills) {
@@ -111,17 +121,18 @@ function createFoundSection(opt_prefills) {
     const pE = spot.pE;
     const prev = colorize(`┇&nbsp;<b>${hourMin(new Date(pE.startTime))}</b> ${pE.title}`, "#999999");
 
-    const found = bullet(true) + `<b>${hourMin(spot.caret)}</b> ${truncate(opt_prefills.title, 12)}`;
+    const isSelected = spot.caretTimeMS == opt_prefills?.selected_spot?.caretTimeMS;
+    const found = bullet(isSelected) + `<b>${hourMin(new Date(spot.caret))}</b> ${truncate(opt_prefills.title, 12)}`;
 
     const aE = spot.aE;
     const next = colorize(`┇&nbsp;<b>${hourMin(new Date(aE.startTime))}</b> ${aE.title}`, "#999999");
 
     section.addWidget(CardService.newDecoratedText()
       .setWrapText(true)
-      // .setTopLabel(prev)
-      // .setBottomLabel(next)
-      // .setText(found));
-      .setText(`${prev}\n${found}\n${next}`));
+      .setText(`${prev}\n${found}\n${next}`)
+      .setOnClickAction(CardService.newAction()
+        .setFunctionName("handleSpotClick")
+        .setParameters({prefills: JSON.stringify({...opt_prefills, selected_spot: spot})})));
 
     // const dateTimePicker = CardService.newDateTimePicker()
     //   .setTitle("Spot found:")

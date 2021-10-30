@@ -143,7 +143,12 @@ function createFoundSection(opt_prefills) {
     // section.addWidget(dateTimePicker);
   });
 
-  section.setCollapsible(true).setNumUncollapsibleWidgets(2);
+  section.setNumUncollapsibleWidgets(2);
+  if (opt_prefills?.selected_spot && opt_prefills?.selected_spot?.caret != opt_prefills?.foundSpots[0]?.caret && opt_prefills?.selected_spot?.caret != opt_prefills?.foundSpots[1]?.caret) {
+    section.setCollapsible(false);
+  } else {
+    section.setCollapsible(true);
+  }
 
   return section;
 }

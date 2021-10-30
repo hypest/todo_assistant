@@ -132,5 +132,7 @@ function createFoundSection(opt_prefills) {
     // section.addWidget(dateTimePicker);
   });
 
+  section.setCollapsible(true).setNumUncollapsibleWidgets(2);
+
   return section;
 }

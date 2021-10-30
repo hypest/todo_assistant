@@ -2,6 +2,10 @@ function min2ms(minutes) {
     return minutes * 60 * 1000;
 }
 
+function hourMin(date) {
+  return date.toLocaleString([], {timeStyle:'short',hour12:false});
+}
+
 function oneWeekFrom(start) {
   const daysToAdd = 1 + 7 + (start.getDay() == 0 ? 0 : 7-start.getDay());
   const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
@@ -21,11 +25,27 @@ function clearAndGetAutoBook(now) {
 
 function findAndMarkSchedule(title, events, duration_ms, nowTimeMS = new Date().getTime(), untilTimeMS = oneWeekFrom(now).getTime()) {
   // const cal = clearAndGetAutoBook(now);
-  const date_time = findSchedule(events, duration_ms, nowTimeMS, untilTimeMS)[0].caret;
-  // console.log(`Found date_time:${date_time} for duration:${duration_ms}`);
-  if (date_time) {
-    const endDate = new Date(date_time.getTime() + duration_ms);
-    // cal.createEvent(title, date_time, endDate);
+  const foundSpots = findSchedule(events, duration_ms, nowTimeMS, untilTimeMS);
+  if (foundSpots[0]) {
+    // const endDate = new Date(foundSpots[0].caret.getTime() + duration_ms);
+    // cal.createEvent(title, foundSpots[0].caret, endDate);
   }
-  return date_time;
+  return foundSpots;
+}
+
+function colorize(text, color) {
+  return `<font color=${color}>${text}</font>`;
+}
+
+function bullet(isSelected, color) {
+  const bul = (isSelected ? '◉ ' : '◎ ');
+  if (color) {
+    return colorize(bul, color);
+  } else {
+    return bul;
+  }
+}
+
+function truncate(str, n){
+  return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
 }

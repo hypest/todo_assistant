@@ -19,7 +19,7 @@ function getContextualAddOn(event) {
       events: events,
       startTimeMS: now.getTime(),
       untilTimeMS: until.getTime(),
-      date_time: findAndMarkSchedule(title, events, DEFAULT_DURATION_MS, now, until)
+      foundSpots: findAndMarkSchedule(title, events, DEFAULT_DURATION_MS, now, until)
   };
   var card = createSchedulerCard(prefills);
 

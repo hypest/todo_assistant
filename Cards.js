@@ -14,14 +14,15 @@ function createSchedulerCard(opt_prefills, opt_status) {
     card.addSection(statusSection);
   }
   
-  var formSection = createFormSection(CardService.newCardSection(), opt_prefills);
-  card.addSection(formSection);
+  card.addSection(createTitleSection(opt_prefills));
+  card.addSection(createDurationSection(opt_prefills));
+  card.addSection(createFoundSection(opt_prefills));
   
   return card;
 }
 
 function onDurationSelected(duration_ms, opt_prefills) {
-  opt_prefills.date_time = findAndMarkSchedule(opt_prefills.title, opt_prefills.events, duration_ms, opt_prefills.startTimeMS, opt_prefills.untilTimeMS);
+  opt_prefills.foundSpots = findAndMarkSchedule(opt_prefills.title, opt_prefills.events, duration_ms, opt_prefills.startTimeMS, opt_prefills.untilTimeMS);
   opt_prefills.duration_ms = duration_ms;
 
   // rebuild the card
@@ -45,11 +46,15 @@ function handleDurationSelectionChange(e) {
   return onDurationSelected(duration_ms, opt_prefills);
 }
 
+function durationFromPrefills(opt_prefills) {
+  return (opt_prefills?.duration_ms ? opt_prefills?.duration_ms : DEFAULT_DURATION_MS);
+}
+
 function createGridItem(label, minutes, opt_prefills) {
   const ms = min2ms(minutes);
-  const isSelected = ms == (opt_prefills?.duration_ms ? opt_prefills?.duration_ms : DEFAULT_DURATION_MS);
+  const isSelected = ms == durationFromPrefills(opt_prefills);
   return CardService.newGridItem()
-    .setTitle((isSelected ? '◉ ' : '◎ ') + label)
+    .setTitle(bullet(isSelected) + label)
     .setIdentifier(ms);
 }
 
@@ -59,7 +64,6 @@ function buttonsGrid(opt_prefills) {
       .setParameters({prefills: JSON.stringify(opt_prefills)}); // pass all the prefills as JSON, was failing if as plain object
 
   const grid = CardService.newGrid()
-    .setTitle("Pick duration")
     .setNumColumns(3)
     .setOnClickAction(durationChangeAction);
 
@@ -71,34 +75,62 @@ function buttonsGrid(opt_prefills) {
   return grid;
 }
 
-/**
- * Creates form section to be displayed on card.
- *
- * @param {CardSection} section The card section to which form items are added.
- * @returns {CardSection}
- */
-function createFormSection(section, opt_prefills) {
-    const titleInput = CardService.newTextInput()
-        .setFieldName("title_field");
-    if (opt_prefills && opt_prefills.title) {
-        titleInput.setValue(opt_prefills.title);
-    }
-    section.addWidget(titleInput);
+function createTitleSection(opt_prefills) {
+  const section = CardService.newCardSection();
 
-    section.addWidget(buttonsGrid(opt_prefills));
+  const titleInput = CardService.newTextInput()
+      .setFieldName("title_field")
+      .setMultiline(true);
+  if (opt_prefills && opt_prefills.title) {
+      titleInput.setValue(opt_prefills.title);
+  }
+  section.addWidget(titleInput);
 
-    const dateTimeLabel = CardService.newTextParagraph();
-    const dateTimePicker = CardService.newDateTimePicker()
-      .setTitle("Spot found:")
-      .setFieldName("date_time_field");
-      // Set default value as Jan 1, 2018, 3:00 AM UTC. Either a number or string is acceptable.
-    if (opt_prefills && opt_prefills.date_time) {
-      dateTimePicker.setValueInMsSinceEpoch(opt_prefills.date_time.getTime());
-      dateTimeLabel.setText(opt_prefills.date_time.toString());
-    }
+  return section;
+}
 
-    section.addWidget(dateTimeLabel);
-    section.addWidget(dateTimePicker);
+function createDurationSection(opt_prefills) {
+  const section = CardService.newCardSection();
+  section.setHeader('Pick duration');
 
+  section.addWidget(buttonsGrid(opt_prefills));
+
+  return section;
+}
+
+function createFoundSection(opt_prefills) {
+  const section = CardService.newCardSection();
+
+  if (opt_prefills && opt_prefills?.foundSpots?.length == 0) {
+    section.addWidget(CardService.newTextParagraph()
+      .setText("Nothing found"));
     return section;
+  }
+
+  opt_prefills.foundSpots.forEach((spot) => {
+    const pE = spot.pE;
+    const prev = colorize(`┇&nbsp;<b>${hourMin(new Date(pE.startTime))}</b> ${pE.title}`, "#999999");
+
+    const found = bullet(true) + `<b>${hourMin(spot.caret)}</b> ${truncate(opt_prefills.title, 12)}`;
+
+    const aE = spot.aE;
+    const next = colorize(`┇&nbsp;<b>${hourMin(new Date(aE.startTime))}</b> ${aE.title}`, "#999999");
+
+    section.addWidget(CardService.newDecoratedText()
+      .setWrapText(true)
+      // .setTopLabel(prev)
+      // .setBottomLabel(next)
+      // .setText(found));
+      .setText(`${prev}\n${found}\n${next}`));
+
+    // const dateTimePicker = CardService.newDateTimePicker()
+    //   .setTitle("Spot found:")
+    //   .setFieldName("date_time_field");
+
+    // dateTimePicker.setValueInMsSinceEpoch(opt_prefills.foundSpots[0].caretTimeMS);
+
+    // section.addWidget(dateTimePicker);
+  });
+
+  return section;
 }

@@ -53,6 +53,13 @@ function handleDurationSelectionChange(e) {
 function handleSpotClick(e) {
   // we sent the prefills as JSON (as simple object was failing in the setParameters stage)
   const opt_prefills = JSON.parse(e.parameters.prefills);
+
+  if (opt_prefills.selected_spot) {
+    markSpot(opt_prefills.title, new Date(opt_prefills.selected_spot.caret).getTime(), opt_prefills.duration_ms);
+  } else {
+    clearAndGetAutoBook(new Date());
+  }
+
   return rebuildAndSetCard(opt_prefills);
 }
 
@@ -132,7 +139,7 @@ function createFoundSection(opt_prefills) {
       .setText(`${prev}\n${found}\n${next}`)
       .setOnClickAction(CardService.newAction()
         .setFunctionName("handleSpotClick")
-        .setParameters({prefills: JSON.stringify({...opt_prefills, selected_spot: spot})})));
+        .setParameters({prefills: JSON.stringify({...opt_prefills, selected_spot: (isSelected ? undefined : spot), duration_ms: durationFromPrefills(opt_prefills)})})));
 
     // const dateTimePicker = CardService.newDateTimePicker()
     //   .setTitle("Spot found:")

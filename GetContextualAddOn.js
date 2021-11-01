@@ -8,7 +8,6 @@
  */
 function getContextualAddOn(event) {
   const message = getCurrentMessage(event);
-  console.log(message.getId());
   const title = getTitle(message);
 
   const now = new Date();

@@ -17,6 +17,7 @@ function createSchedulerCard(opt_prefills, opt_status) {
   card.addSection(createTitleSection(opt_prefills));
   card.addSection(createDurationSection(opt_prefills));
   card.addSection(createFoundSection(opt_prefills));
+  card.addSection(createCalendarSection(CalendarApp.getAllCalendars()));
   
   return card;
 }
@@ -110,7 +111,7 @@ function createTitleSection(opt_prefills) {
     .setFieldName("description_field")
     .setMultiline(true)
     .setHint('Description')
-    .setValue(opt_prefills?.description || `Link to email: ${opt_prefills.emailLink}`));
+    .setValue(opt_prefills?.description || `<hr>Link to email: ${opt_prefills.emailLink}`));
 
   section.setCollapsible(true).setNumUncollapsibleWidgets(1);
 

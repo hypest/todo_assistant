@@ -1,3 +1,24 @@
+function getSchedulerCardForContext(event) {
+  const message = getCurrentMessage(event);
+  const title = getTitle(message);
+
+  const now = new Date();
+  const until = oneWeekFrom(now);
+  const events = getEvents(CALENDARS, now, until);
+
+  const prefills = {
+      title: title,
+      emailId: message.getId(),
+      emailLink: `https://mail.google.com/mail/u/0/#all/${message.getId()}`,
+      events: events,
+      startTimeMS: now.getTime(),
+      untilTimeMS: until.getTime(),
+      foundSpots: findAndMarkSchedule(title, events, DEFAULT_DURATION_MS, now, until)
+  };
+
+  return createSchedulerCard(prefills);
+}
+
 function createSchedulerCard(opt_prefills, opt_status) {
   var card = CardService.newCardBuilder();
   // card.setHeader(CardService.newCardHeader().setTitle('Schedule a task'));
@@ -17,7 +38,7 @@ function createSchedulerCard(opt_prefills, opt_status) {
   card.addSection(createTitleSection(opt_prefills));
   card.addSection(createDurationSection(opt_prefills));
   card.addSection(createFoundSection(opt_prefills));
-  card.addSection(createCalendarSection(CalendarApp.getAllCalendars()));
+  // card.addSection(createCalendarSection(CalendarApp.getAllCalendars()));
   
   return card;
 }

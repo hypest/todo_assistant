@@ -1,12 +1,21 @@
+function getCalendarSelectionCardForContext(event) {
+  const card = CardService.newCardBuilder();
+  card.setHeader(CardService.newCardHeader().setTitle('Select input calendars'));
+  
+  card.addSection(createCalendarSection(CalendarApp.getAllCalendars()));
+  
+  return card;
+}
+
 function handleCalendarsCheckboxes(e) {
   PropertiesService.getScriptProperties().setProperty(
-    INPUT_CALENDARS_PROP_KEY, JSON.stringify(e.commonEventObject.formInputs.calendars_field.stringInputs.value));
+    INPUT_CALENDARS_PROP_KEY, JSON.stringify(e.commonEventObject.formInputs.calendars_field?.stringInputs.value || []));
 }
 
 function createCalendarsWidget(calendars, selectedCalendars=[]) {
   const calendarsWidget = CardService.newSelectionInput()
     .setType(CardService.SelectionInputType.CHECK_BOX)
-    .setTitle("Select which calendars to check.")
+    // .setTitle("Select which calendars to check.")
     .setFieldName("calendars_field")
     .setOnChangeAction(CardService.newAction()
       .setFunctionName("handleCalendarsCheckboxes"));

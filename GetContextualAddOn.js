@@ -7,25 +7,11 @@
  * @returns {Card[]}
  */
 function getContextualAddOn(event) {
-  const message = getCurrentMessage(event);
-  const title = getTitle(message);
+  if (CALENDARS.length > 0) {
+    return [getSchedulerCardForContext(event).build()];
+  }
 
-  const now = new Date();
-  const until = oneWeekFrom(now);
-  const events = getEvents(CALENDARS, now, until);
-
-  var prefills = {
-      title: title,
-      emailId: message.getId(),
-      emailLink: `https://mail.google.com/mail/u/0/#all/${message.getId()}`,
-      events: events,
-      startTimeMS: now.getTime(),
-      untilTimeMS: until.getTime(),
-      foundSpots: findAndMarkSchedule(title, events, DEFAULT_DURATION_MS, now, until)
-  };
-  var card = createSchedulerCard(prefills);
-
-  return [card.build()];
+  return [getCalendarSelectionCardForContext(event).build()];
 }
   
 /**

@@ -130,6 +130,7 @@ function createDurationSection(opt_prefills) {
 function createFoundSection(opt_prefills) {
   const section = CardService.newCardSection();
 
+  console.log(`foundSpots: ${JSON.stringify(opt_prefills.foundSpots)}`);
   if (opt_prefills && opt_prefills?.foundSpots?.length == 0) {
     section.addWidget(CardService.newTextParagraph()
       .setText("Nothing found"));
@@ -138,13 +139,13 @@ function createFoundSection(opt_prefills) {
 
   opt_prefills.foundSpots.forEach((spot) => {
     const pE = spot.pE;
-    const prev = colorize(`┇&nbsp;<b>${hourMin(new Date(pE.startTime))}</b> ${pE.title}`, "#999999");
+    const prev = pE ? colorize(`┇&nbsp;<b>${hourMin(new Date(pE.startTime))}</b> ${pE.title}`, "#999999") : '(nothing)';
 
     const isSelected = spot.caretTimeMS == opt_prefills?.selected_spot?.caretTimeMS;
     const found = bullet(isSelected) + `<b>${hourMin(new Date(spot.caret))}</b> ${truncate(opt_prefills.title, 12)}`;
 
     const aE = spot.aE;
-    const next = colorize(`┇&nbsp;<b>${hourMin(new Date(aE.startTime))}</b> ${aE.title}`, "#999999");
+    const next = aE ? colorize(`┇&nbsp;<b>${hourMin(new Date(aE.startTime))}</b> ${aE.title}`, "#999999") : '(nothing)';
 
     section.addWidget(CardService.newDecoratedText()
       .setWrapText(true)

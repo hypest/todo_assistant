@@ -47,7 +47,12 @@ function findSchedule(events, duration, nowTimeMS, untilTimeMS) {
 }
 
 function getEvents(calendars, after, until) {
-  return calendars.reduce((acc, calendar) => {
+  const cachedValue = CacheService.getScriptCache().get(until);
+  if (cachedValue) {
+    return JSON.parse(cachedValue).filter(event => event.endTimeMS >= after.getTime());
+  }
+
+  const events = calendars.reduce((acc, calendar) => {
     // console.log(calendar.getName());
     const es = calendar.getEvents(after, until);
     es.forEach((event) => {
@@ -61,6 +66,10 @@ function getEvents(calendars, after, until) {
     acc = acc.concat(es);
     return acc;
   }, []);
+
+  CacheService.getScriptCache().put(until, JSON.stringify(events));
+
+  return events;
 }
 
 function sortEvents(events) {

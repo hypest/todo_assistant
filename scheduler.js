@@ -2,7 +2,7 @@
 
 function testScheduler() {
   const now = new Date();
-  const events = getEvents(getInputCalendars(), now, oneWeekFrom(now));
+  const events = getEvents(now, oneWeekFrom(now));
 
   // console.log(events);
   // events.forEach((event, index, array) => {
@@ -23,7 +23,7 @@ function testFindSchedule() {
   const until = oneWeekFrom(now);
 
   console.time("Get events");
-  const events = getEvents(getInputCalendars(), now, until);
+  const events = getEvents(now, until);
   console.timeEnd("Get events");
  
   var founds = findSchedule(events, 3 * 60 * 60 * 1000, now, until);
@@ -46,11 +46,12 @@ function findSchedule(events, duration, nowTimeMS, untilTimeMS) {
   return s;
 }
 
-function getEvents(calendars, after, until) {
+function getEvents(after, until) {
   const cachedValue = CacheService.getScriptCache().get(until);
   if (cachedValue) {
-    return JSON.parse(cachedValue).filter(event => event.endTimeMS >= after.getTime());
   }
+
+  const calendars = getInputCalendars();
 
   const events = calendars.reduce((acc, calendar) => {
     // console.log(calendar.getName());

@@ -2,7 +2,7 @@
 
 function testScheduler() {
   const now = new Date();
-  const events = getEvents(CALENDARS, now, oneWeekFrom(now));
+  const events = getEvents(getInputCalendars(), now, oneWeekFrom(now));
 
   // console.log(events);
   // events.forEach((event, index, array) => {
@@ -23,7 +23,7 @@ function testFindSchedule() {
   const until = oneWeekFrom(now);
 
   console.time("Get events");
-  const events = getEvents(CALENDARS, now, until);
+  const events = getEvents(getInputCalendars(), now, until);
   console.timeEnd("Get events");
  
   var founds = findSchedule(events, 3 * 60 * 60 * 1000, now, until);

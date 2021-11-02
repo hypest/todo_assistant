@@ -55,3 +55,11 @@ function bullet(isSelected, color) {
 function truncate(str, n){
   return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
 }
+
+function getInputCalendarIDs(propertiesKey = INPUT_CALENDARS_PROP_KEY) {
+  return JSON.parse(PropertiesService.getScriptProperties().getProperty(propertiesKey) || []);
+}
+
+function getInputCalendars(ids = getInputCalendarIDs()) {
+  return ids.map(calendarId => CalendarApp.getCalendarById(calendarId));
+}

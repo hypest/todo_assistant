@@ -7,7 +7,7 @@
  * @returns {Card[]}
  */
 function getContextualAddOn(event) {
-  if (CALENDARS.length > 0) {
+  if (getInputCalendarIDs().length > 0) {
     return [getSchedulerCardForContext(event).build()];
   }
 

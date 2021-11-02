@@ -4,7 +4,7 @@ function getSchedulerCardForContext(event) {
 
   const now = new Date();
   const until = oneWeekFrom(now);
-  const events = getEvents(CALENDARS, now, until);
+  const events = getEvents(getInputCalendars(), now, until);
 
   const prefills = {
       title: title,
@@ -34,13 +34,25 @@ function createSchedulerCard(opt_prefills, opt_status) {
       .setText('<b>' + opt_status + '</b>'));
     card.addSection(statusSection);
   }
-  
+
+  card.addCardAction(CardService.newCardAction()
+    .setText("Select calendars")
+    .setOnClickAction(CardService.newAction()
+      .setFunctionName("handleGotoCalendars")));
+
   card.addSection(createTitleSection(opt_prefills));
   card.addSection(createDurationSection(opt_prefills));
   card.addSection(createFoundSection(opt_prefills));
   // card.addSection(createCalendarSection(CalendarApp.getAllCalendars()));
   
   return card;
+}
+
+function handleGotoCalendars(e) {
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation()
+      .pushCard(getCalendarSelectionCardForContext(e).build())
+    ).build();
 }
 
 function rebuildAndSetCard(opt_prefills) {

@@ -16,8 +16,14 @@ function getCalendarSelectionCardForContext(e) {
 }
 
 function handleSubmitCalendarsSelection(e) {
-  PropertiesService.getScriptProperties().setProperty(
-    INPUT_CALENDARS_PROP_KEY, JSON.stringify(e.commonEventObject.formInputs.calendars_field?.stringInputs.value || []));
+  const prevCals = PropertiesService.getScriptProperties().getProperty(INPUT_CALENDARS_PROP_KEY);
+  const newCals = JSON.stringify(e.commonEventObject.formInputs.calendars_field?.stringInputs.value || []);
+
+  if (newCals !== prevCals) {
+    clearEventsCache();
+  }
+
+  PropertiesService.getScriptProperties().setProperty(INPUT_CALENDARS_PROP_KEY, newCals);
 
   return CardService.newActionResponseBuilder()
     .setStateChanged(true)

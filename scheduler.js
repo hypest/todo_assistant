@@ -47,9 +47,9 @@ function findSchedule(events, duration, nowTimeMS, untilTimeMS) {
 }
 
 function getEvents(after, until) {
-  const cachedValue = CacheService.getScriptCache().get(until);
-  if (cachedValue) {
-    return JSON.parse(cachedValue).filter(event => event.endTimeMS >= after.getTime());
+  const cachedEvents = getCachedEvents(until);
+  if (cachedEvents) {
+    return cachedEvents.filter(event => event.endTimeMS >= after.getTime());
   }
 
   const calendars = getInputCalendars();
@@ -69,7 +69,7 @@ function getEvents(after, until) {
     return acc;
   }, []);
 
-  CacheService.getScriptCache().put(until, JSON.stringify(events));
+  cacheEvents(until, events);
 
   return events;
 }

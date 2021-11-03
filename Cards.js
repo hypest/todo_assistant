@@ -4,7 +4,7 @@ function getSchedulerCardForContext(event) {
 
   const now = new Date();
   const until = oneWeekFrom(now);
-  const events = getEvents(getInputCalendars(), now, until);
+  const events = getEvents(now, until);
 
   const prefills = {
       title: title,

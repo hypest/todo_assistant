@@ -49,6 +49,7 @@ function findSchedule(events, duration, nowTimeMS, untilTimeMS) {
 function getEvents(after, until) {
   const cachedValue = CacheService.getScriptCache().get(until);
   if (cachedValue) {
+    return JSON.parse(cachedValue).filter(event => event.endTimeMS >= after.getTime());
   }
 
   const calendars = getInputCalendars();

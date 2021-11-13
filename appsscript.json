@@ -19,15 +19,15 @@
     "https://www.google.com/calendar/feeds"
   ],
   "gmail": {
-    "name": "Schedular",
-    "logoUrl": "https://www.gstatic.com/images/icons/material/system/1x/add_task_black_24dp.png",
+    "name": "Task Scheduler",
+    "logoUrl": "https://drive.google.com/uc?id=1X-knNYDqfs_MV-yO2T-9yLdQOgF9KO_n",
     "contextualTriggers": [
       {
         "unconditional": {},
         "onTriggerFunction": "getContextualAddOn"
       }
     ],
-    "primaryColor": "#41f470",
+    "primaryColor": "#0000ff",
     "secondaryColor": "#94f441"
   }
 }
